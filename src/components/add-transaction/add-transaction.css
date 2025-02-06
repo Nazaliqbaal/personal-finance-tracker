@@ -1,0 +1,183 @@
+.transaction-form-section {
+  position: relative;
+  width: 450px;
+  background-color: transparent;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  /* display: flex; */
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 4rem;
+  font-family: "poppins";
+  /* font-family: "Roboto Condensed", serif; */
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .transaction-form-section {
+    width: 100%;
+    padding: 1rem;
+    font-size: 16px;
+  }
+}
+
+h1 {
+  font-size: 1.5rem;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.main-form-transaction {
+  font-family: "poppins";
+
+  /* font-family: "Roboto Condensed", serif; */
+}
+
+.inputbox {
+  position: relative;
+  margin: 30px 0;
+  /* max-width: 310px; */
+  border-bottom: 2px solid #fff;
+}
+
+.inputbox label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.5s ease-in-out;
+}
+
+input:focus ~ label,
+input:valid ~ label {
+  top: -5px;
+}
+
+.inputbox input {
+  width: 100%;
+  height: 60px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 0 35px 0 5px;
+  color: #fff;
+}
+
+.inputbox ion-icon {
+  position: absolute;
+  right: 8px;
+  color: #fff;
+  font-size: 1.2rem;
+  top: 20px;
+}
+
+.form-submit {
+  width: 100%;
+  height: 40px;
+  border-radius: 40px;
+  background-color: rgb(255, 255, 255, 1);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.4s ease;
+}
+
+.form-submit:hover {
+  background-color: rgb(255, 255, 255, 0.5);
+}
+
+.register {
+  font-size: 0.9rem;
+  color: #fff;
+  text-align: center;
+  margin: 25px 0 10px;
+}
+
+.register p a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.register p a:hover {
+  text-decoration: underline;
+}
+
+.error-text {
+  color: #d67a7a;
+  font-size: 10px;
+  margin-left: 8px;
+}
+
+/* Container for toggle buttons */
+.transaction-type-toggle {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  padding: 6px;
+  border: 1px solid #1f2937;
+  border-radius: 20px;
+}
+
+/* Style for each toggle button */
+.transaction-type-toggle-button {
+  padding: 10px 20px;
+  background-color: #bcb8b8;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+  flex: 1;
+}
+
+.transaction-type-toggle-button:not(:last-child) {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+.transaction-type-toggle-button:not(:first-child) {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.transaction-type-toggle-button.active {
+  color: white;
+}
+.transaction-type-toggle-button.expense.active {
+  background-color: #f87171; /* Red */
+}
+.transaction-type-toggle-button.income.active {
+  background-color: #60a5fa; /* Blue */
+}
+
+/* Hover effect for buttons */
+
+/* Optional: Additional styling for form elements */
+.transaction-input,
+.transaction-textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  /* border-radius: 5px; */
+  border: 1px solid #ddd;
+}
+
+.transaction-submit-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.transaction-submit-button:hover {
+  background-color: #45a049;
+}
