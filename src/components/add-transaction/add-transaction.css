@@ -121,8 +121,8 @@ input:valid ~ label {
   display: flex;
   justify-content: space-around;
   margin-bottom: 20px;
-  padding: 6px;
-  border: 1px solid #1f2937;
+  padding: 4px;
+  border: 0.5px solid #1f2937;
   border-radius: 20px;
 }
 

@@ -3,13 +3,13 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA1tOlADoJNH_K63gVr4kejbIRwdWaRZ9E",
-  authDomain: "personal-finance-tracker-f5e6d.firebaseapp.com",
-  projectId: "personal-finance-tracker-f5e6d",
-  storageBucket: "personal-finance-tracker-f5e6d.firebasestorage.app",
-  messagingSenderId: "173856092933",
-  appId: "1:173856092933:web:cd733f3d5f4c49effebd6c",
-  measurementId: "G-M22G12XX60",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);

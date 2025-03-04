@@ -7,17 +7,18 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { NavLink } from "react-router-dom";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "../../utils/cn";
 import { useAuth } from "../../utils/auth-context";
 import "./navbar.css";
+import { HandCoins } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Add Transaction", href: "/add-transaction" },
-  { name: "Projects", href: "/projects" },
-  { name: "Calendar", href: "/calendar" },
+  { name: "Summary", href: "/summary" },
+  { name: "Export", href: "/export" },
 ];
 
 // function classNames(...classes: string[]) {
@@ -27,10 +28,14 @@ const navigation = [
 export default function Navbar() {
   const { logout, user, theme, toggleTheme } = useAuth();
   console.log(user);
+  const navigate = useNavigate();
+  const navigateDashboard = () => {
+    navigate("/dashboard");
+  };
 
   return (
     <Disclosure as="nav" className="bg-gray-800 fixed top-0 left-0 w-full z-50">
-      {({ open, setOpen }) => (
+      {() => (
         <>
           <div className="mx-auto px-2 lg:px-8">
             <div className="relative flex h-16 items-center justify-between">
@@ -51,11 +56,19 @@ export default function Navbar() {
               </div>
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex shrink-0 items-center">
-                  <img
+                  {/* <img
                     alt="Your Company"
                     src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
                     className="h-8 w-auto"
-                  />
+                  /> */}
+                  <div
+                    className="space-x-1 flex text-white"
+                    onClick={navigateDashboard}
+                  >
+                    {" "}
+                    <HandCoins strokeWidth={0.75} />{" "}
+                    <span> Finance Tracker</span>
+                  </div>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
@@ -87,14 +100,14 @@ export default function Navbar() {
                   />
                   <label></label>
                 </div>
-                <button
+                {/* <button
                   type="button"
                   className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden"
                 >
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">View notifications</span>
                   <BellIcon aria-hidden="true" className="size-6" />
-                </button>
+                </button> */}
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
@@ -148,7 +161,6 @@ export default function Navbar() {
                 <NavLink
                   key={item.name}
                   to={item.href}
-                  onClick={() => setOpen(false)}
                   className={({ isActive }) =>
                     cn(
                       isActive

@@ -1,14 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { db } from "../../firebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { useAuth } from "../../utils/auth-context";
 import { Transaction } from "../../utils/types";
 import { useForm } from "react-hook-form";
 import "./add-transaction.css";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const AddTransactionForm = () => {
+  const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { register, handleSubmit, setValue } = useForm<Transaction>({
@@ -19,13 +27,45 @@ const AddTransactionForm = () => {
   });
 
   const [type, setType] = useState<"expense" | "income">("expense");
-  const [categories, setCategories] = useState<string[]>([]);
+  // const [categories, setCategories] = useState<string[]>([]);
   const [showCategoryList, setShowCategoryList] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
   const categoryInputRef = useRef<HTMLDivElement>(null);
   const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
+
+  useEffect(() => {
+    const fetchTransaction = async () => {
+      if (!id || !user) return;
+
+      try {
+        const docRef = doc(db, `users/${user.uid}/transactions`, id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data() as Transaction;
+          setSelectedTransaction(data);
+          // Populate the form with existing values
+          setValue("type", data.type);
+          setValue("amount", data.amount);
+          setValue("category", data.category);
+          setValue("date", data.date);
+          setValue("notes", data.notes);
+          setType(data.type);
+        } else {
+          toast.error("Transaction not found!");
+        }
+      } catch (error) {
+        console.error("Error fetching transaction:", error);
+        toast.error("Failed to fetch transaction.");
+      }
+    };
+
+    fetchTransaction();
+  }, [id, user, setValue]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -60,15 +100,37 @@ const AddTransactionForm = () => {
       if (isNaN(parsedAmount) || parsedAmount <= 0) {
         return toast.error("Please enter a valid amount");
       }
-      await addDoc(collection(db, `users/${user.uid}/transactions`), {
-        type,
-        amount: parsedAmount,
-        category,
-        date,
-        notes,
-        userId: user.uid,
-      });
-      toast.success("Transaction added!");
+      // await addDoc(collection(db, `users/${user.uid}/transactions`), {
+      //   type,
+      //   amount: parsedAmount,
+      //   category,
+      //   date,
+      //   notes,
+      //   userId: user.uid,
+      // });
+      // toast.success("Transaction added!");
+      if (id) {
+        // Update existing transaction
+        await updateDoc(doc(db, `users/${user.uid}/transactions`, id), {
+          type,
+          amount: parsedAmount,
+          category,
+          date,
+          notes,
+        });
+        toast.success("Transaction updated!");
+      } else {
+        // Add new transaction
+        await addDoc(collection(db, `users/${user.uid}/transactions`), {
+          type,
+          amount: parsedAmount,
+          category,
+          date,
+          notes,
+          userId: user.uid,
+        });
+        toast.success("Transaction added!");
+      }
       navigate("/dashboard");
     } catch (error) {
       console.error("Error adding transaction:", error);
@@ -78,6 +140,8 @@ const AddTransactionForm = () => {
   const handleTypeChange = (newType: "expense" | "income") => {
     setType(newType);
     setValue("type", newType); // Update the form value
+    setValue("category", ""); // Clear the category value when switching types
+    setShowCategoryList(false); // Close the category list dropdown when switching types
   };
 
   const handleSelectCategory = (category: string) => {
@@ -128,7 +192,7 @@ const AddTransactionForm = () => {
         onSubmit={handleSubmit(handleTransactionSubmit)}
         className="main-form-transaction"
       >
-        <div className="transaction-type-toggle border-b-gray-900 flex w-full bg-white dark:bg-slate-700 p-1 rounded-lg">
+        <div className="transaction-type-toggle border-b-gray-900 flex w-full bg-white dark:bg-slate-700 b-1 rounded-lg">
           {/* Expense Button */}
           <button
             type="button"
@@ -229,7 +293,7 @@ const AddTransactionForm = () => {
 
                   {/* Add new category */}
                   <div
-                    className="p-2  cursor-pointer  hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 text-center dark:text-gray-400"
+                    className="p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 text-center dark:text-gray-400"
                     onClick={() => setAddingCategory(true)}
                   >
                     + Add
@@ -246,6 +310,11 @@ const AddTransactionForm = () => {
                     onChange={(e) => setNewCategory(e.target.value)}
                     placeholder="Enter new category"
                     className="w-full p-2 border rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none"
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault(); // Prevent form submission on Enter key press
+                      }
+                    }}
                   />
                   <div className="flex gap-3 mt-5">
                     <button
@@ -291,7 +360,7 @@ const AddTransactionForm = () => {
             type === "expense" ? "bg-red-400" : "bg-blue-400"
           }`}
         >
-          Add
+          {selectedTransaction ? "Update" : "Add"}
         </button>
       </form>
     </section>

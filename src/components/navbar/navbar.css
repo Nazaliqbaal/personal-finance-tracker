@@ -21,8 +21,8 @@
 }
 .toggle label:before {
   content: "";
-  width: 60px;
-  height: 32px;
+  width: 54px;
+  height: 28px;
   background: #fff;
   border: 2px solid #ddd;
   box-shadow: inset -30px 0 0 #666;
@@ -35,11 +35,11 @@
 
 .toggle label:after {
   content: "";
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   position: absolute;
-  left: 3px;
-  top: 7px;
+  left: 2px;
+  top: 6px;
   border-radius: 50%;
   background: #fffdfd;
   box-shadow: inset -8px -5px #333;

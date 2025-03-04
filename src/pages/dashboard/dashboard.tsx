@@ -1,13 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { db } from "../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { useAuth } from "../../utils/auth-context";
 import { Transaction } from "../../utils/types";
+import TransactionTab from "../../components/transaction-tab/transaction-tab";
+import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
+import "./dashboard.css";
 
 const DashboardPage = () => {
-  const { user, theme } = useAuth();
-  console.log("theme is", theme);
-
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const navigateToAddTransaction = () => {
+    navigate("/add-transaction");
+  };
+  const [selectedMonth] = useState(new Date().getMonth()); // Default: Current month
   const [groupedTransactions, setGroupedTransactions] = useState<
     Record<
       string,
@@ -44,7 +51,7 @@ const DashboardPage = () => {
         transactions.forEach((transaction) => {
           const dateKey = new Date(transaction.date)
             .toISOString()
-            .split("T")[0]; // Format as YYYY-MM-DD
+            .split("T")[0];
 
           if (!grouped[dateKey]) {
             grouped[dateKey] = {
@@ -56,7 +63,6 @@ const DashboardPage = () => {
 
           grouped[dateKey].transactions.push(transaction);
 
-          // Calculate total expense and income
           if (transaction.type === "expense") {
             grouped[dateKey].totalExpense += parseFloat(
               transaction.amount.toString()
@@ -73,80 +79,63 @@ const DashboardPage = () => {
           ([dateA], [dateB]) =>
             new Date(dateB).getTime() - new Date(dateA).getTime()
         );
-        const sortedGroupedTransactions = Object.fromEntries(sortedEntries);
-
-        setGroupedTransactions(sortedGroupedTransactions);
+        setGroupedTransactions(Object.fromEntries(sortedEntries));
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
     };
 
     fetchTransactions();
-  }, [user]);
+  }, [user, selectedMonth]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "short",
-      day: "numeric",
-    };
-    return date.toLocaleDateString("en-US", options); // Example: "Monday, 29"
+  const filteredTransactions = useMemo(() => {
+    return Object.values(groupedTransactions).flatMap(
+      (group) => group.transactions
+    );
+  }, [groupedTransactions]);
+
+  const handleDeleteTransaction = async (id: string, dateKey: string) => {
+    try {
+      await deleteDoc(doc(db, `users/${user?.uid}/transactions`, id));
+
+      setGroupedTransactions((prevGroupedTransactions) => {
+        const updatedGroupedTransactions = { ...prevGroupedTransactions };
+        const transactionsForDate = updatedGroupedTransactions[dateKey];
+
+        transactionsForDate.transactions =
+          transactionsForDate.transactions.filter(
+            (transaction) => transaction.id !== id
+          );
+
+        transactionsForDate.totalExpense = transactionsForDate.transactions
+          .filter((transaction) => transaction.type === "expense")
+          .reduce((acc, curr) => acc + parseFloat(curr.amount.toString()), 0);
+
+        transactionsForDate.totalIncome = transactionsForDate.transactions
+          .filter((transaction) => transaction.type === "income")
+          .reduce((acc, curr) => acc + parseFloat(curr.amount.toString()), 0);
+
+        return updatedGroupedTransactions;
+      });
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+    }
   };
 
   return (
-    <section className="transactions-list font-poppins mt-6 dark:bg-gray-800 ">
-      {Object.entries(groupedTransactions).map(
-        ([date, { transactions, totalExpense, totalIncome }]) => (
-          <div key={date} className="transaction-group dark:bg-[#1e1e1e] my-2 ">
-            <div className="transaction-header px-3 border-y-2 border-gray-400 py-3 flex justify-between">
-              <h2 className="text-sm text-gray-900 font-bold  dark:text-gray-300">
-                {formatDate(date)}
-              </h2>
-              <p className="space-x-4 text-sm">
-                <span className="text-blue-400">
-                  &#8377; {totalIncome.toFixed(2)}
-                </span>{" "}
-                <span className="text-red-400">
-                  &#8377; {totalExpense.toFixed(2)}
-                </span>
-              </p>
-            </div>
-            <ul>
-              {transactions.map((transaction) => (
-                <li
-                  key={transaction.id}
-                  className={`transaction-item py-2 border-b px-3 flex justify-between items-center dark:text-gray-300 ${transaction.type}`}
-                >
-                  <div className="flex gap-5 justify-center items-center ">
-                    <div className="w-28 text-sm truncate overflow-hidden whitespace-nowrap dark:text-gray-500 ">
-                      {transaction.category}
-                    </div>
-                    <div>
-                      <div className="text-sm">
-                        {transaction.notes || "No notes"}
-                      </div>
-                      <div className="text-xs dark:text-gray-500">
-                        {transaction.notes || "No notes"}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className={`text-sm ${
-                      transaction.type === "expense"
-                        ? "text-red-400"
-                        : "text-blue-400"
-                    }`}
-                  >
-                    {transaction.type === "expense"
-                      ? ` ₹ ${transaction.amount}`
-                      : ` ₹ ${transaction.amount}`}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      )}
+    <section className="transactions-list h-full flex flex-col justify-between font-poppins dark:bg-[#1e1e1e]">
+      <TransactionTab
+        transactions={filteredTransactions}
+        handleDeleteTransaction={handleDeleteTransaction}
+      />
+      <div className="sm:hidden text-right m-8 flex justify-end">
+        <button
+          className="cssbuttons-io-button absolute bottom-8"
+          onClick={navigateToAddTransaction}
+        >
+          <Plus />
+        </button>
+      </div>
     </section>
   );
 };
